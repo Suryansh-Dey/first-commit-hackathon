@@ -1,4 +1,4 @@
-# ✈️ Explorify Trips — AI-Powered Travel Planner
+# Explorify Trips — AI-Powered Travel Planner
 
 An end-to-end travel planning platform that uses **Gemini AI with real-time tool-calling** to generate complete trip itineraries — flights, trains, hotels, and day-by-day sightseeing — streamed live to the user.
 
@@ -85,6 +85,8 @@ An end-to-end travel planning platform that uses **Gemini AI with real-time tool
 ```
 
 ---
+<img width="1908" height="882" alt="image" src="https://github.com/user-attachments/assets/d9b6b7de-a366-4328-b5bd-817303fa3f5d" />
+
 
 ## Tech Stack
 

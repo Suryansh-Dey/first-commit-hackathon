@@ -70,7 +70,7 @@ export default function Footer() {
             <ul className="text-sm space-y-2">
               <li>
                 <Link
-                  href="https://merchant.razorpay.com/policy/Rn6lxkXvDOSLbk/terms"
+                  href="#"
                   className="text-slate-300 hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -80,7 +80,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="https://merchant.razorpay.com/policy/Rn6lxkXvDOSLbk/privacy"
+                  href="#"
                   className="text-slate-300 hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -90,7 +90,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="https://merchant.razorpay.com/policy/Rn6lxkXvDOSLbk/refund"
+                  href="#"
                   className="text-slate-300 hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -100,7 +100,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="https://merchant.razorpay.com/policy/Rn6lxkXvDOSLbk/contact_us"
+                  href="#"
                   className="text-slate-300 hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -163,8 +163,6 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <span>Made with ❤️ in India</span>
-            <span>•</span>
-            <span>Powered by Razorpay</span>
           </div>
         </div>
       </div>

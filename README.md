@@ -21,9 +21,6 @@ An end-to-end travel planning platform that uses **Gemini AI with real-time tool
 - [Frontend — Next.js](#frontend--nextjs)
   - [WASM Session Manager](#wasm-session-manager)
   - [Real-Time Streaming UI](#real-time-streaming-ui)
-  - [Authentication](#authentication)
-  - [Database & Storage](#database--storage)
-  - [Payments](#payments)
 - [Deployment](#deployment)
 - [Environment Variables](#environment-variables)
 - [Local Development](#local-development)
@@ -69,19 +66,6 @@ An end-to-end travel planning platform that uses **Gemini AI with real-time tool
                          │  │  • Google Places      │  │
                          │  └──────────────────────┘  │
                          └───────────────────────────┘
-
-                    ┌─────────────────────────────────┐
-                    │         AWS Services             │
-                    │  • DynamoDB (Users, Bookings,    │
-                    │    Plans, Departures)             │
-                    │  • S3 (Images, Itinerary PDFs)   │
-                    └─────────────────────────────────┘
-
-                    ┌─────────────────────────────────┐
-                    │         Razorpay                  │
-                    │  • Payment Orders                │
-                    │  • Refunds & Vendor Payouts      │
-                    └─────────────────────────────────┘
 ```
 
 ---
@@ -97,10 +81,6 @@ An end-to-end travel planning platform that uses **Gemini AI with real-time tool
 | **Backend Runtime** | AWS Lambda | Response streaming mode (`RESPONSE_STREAM`) for real-time output |
 | **Frontend** | Next.js 16 | React 19, TypeScript, TailwindCSS 4, Turbopack |
 | **Session Management** | Rust → WASM | `gemini-client-api` compiled to WebAssembly for client-side session tracking |
-| **Auth** | NextAuth v5 (Beta) | Google OAuth + Email/Password with JWT strategy |
-| **Database** | AWS DynamoDB | Users, Plans, Bookings, Departures tables |
-| **File Storage** | AWS S3 | Profile images, trip images, itinerary PDFs |
-| **Payments** | Razorpay | Orders, payment verification, refunds, vendor payouts |
 | **External APIs** | RapidAPI + Google | Google Flights, Booking.com, IRCTC, Google Places |
 | **Frontend Hosting** | Vercel | Edge runtime for API proxy routes |
 
@@ -138,11 +118,8 @@ first-commit-hackathon/
     │   │   ├── travel-planner/
     │   │   │   ├── ask/route.ts      # Edge proxy → Lambda (streams response)
     │   │   │   └── resolve-photos/   # Google Places photo URL resolver
-    │   │   ├── auth/                 # NextAuth handlers, signup, signout
     │   │   └── places/autocomplete/  # Places autocomplete API
-    │   └── auth/sign-in/             # Custom sign-in page
     ├── components/
-    │   ├── AuthProvider.tsx
     │   ├── travel-planner/
     │   │   ├── TripFormWizard.tsx     # Multi-step trip input form
     │   │   ├── output-box.tsx        # Streaming output container
@@ -154,28 +131,18 @@ first-commit-hackathon/
     │   │       ├── HotelSection.tsx        # Hotel cards with images
     │   │       ├── ItinerarySection.tsx    # Day-by-day activity cards
     │   │       └── MessageThread.tsx       # Chat message thread
-    │   ├── bookings/
-    │   │   └── CancelBookingButton.tsx
     │   ├── common/
     │   │   ├── nav/                   # Navbar + Footer
     │   │   └── theme-provider.tsx     # Dark/light theme
     │   └── ui/                        # Radix UI primitives (button, dialog, dropdown)
     ├── lib/
-    │   ├── dynamodb.ts               # DynamoDB client config
-    │   ├── db-helpers.ts             # CRUD operations for all tables
     │   ├── s3.ts                     # S3 presigned URLs, file management
-    │   ├── razorpay.ts               # Payment orders, refunds, vendor transfers
-    │   ├── password.ts               # Password hashing/verification
     │   ├── utils.ts                  # Utility functions
     │   └── travel-planner/session/   # Rust → WASM session manager
     │       ├── Cargo.toml            # gemini-client-api (no_default_features), wasm-bindgen
     │       └── src/lib.rs            # SessionManager: tracks chat history client-side
     ├── types/
-    │   ├── dynamodb.ts               # DynamoDB entity types (User, Plan, Booking, Departure)
-    │   ├── razorpay.ts               # Payment type definitions
-    │   ├── api.ts                    # API response types
-    │   └── next-auth.d.ts            # NextAuth type extensions
-    ├── auth.ts                       # NextAuth config (Google + Credentials providers)
+    │   └── api.ts                    # API response types
     ├── next.config.ts                # Image remote patterns (S3, Google, Unsplash)
     └── package.json
 ```
@@ -315,38 +282,6 @@ Lambda stream → Edge proxy → ReadableStream → TextDecoder → split('\n')
 During streaming, animated "status pills" show the current function calls:
 - *"Searching flights"*, *"Searching hotels"*, *"Finding best scenery"*, etc.
 
-### Authentication
-
-- **NextAuth v5** with JWT session strategy (30-day expiry)
-- **Google OAuth** — auto-creates user in DynamoDB on first sign-in
-- **Email/Password** — password hashing with signup API route
-- Custom sign-in page at `/auth/sign-in`
-- Role-based access: `user`, `vendor`, `admin`
-
-### Database & Storage
-
-**DynamoDB Tables:**
-
-| Table | Key | Description |
-|-------|-----|-------------|
-| `Users` | `userId` | User profiles, vendor info, bank details |
-| `TravelPlans` | `planId` | Vendor-created travel packages |
-| `Departures` | `departureId` | Scheduled departures for plans |
-| `Bookings` | `bookingId` | User bookings with payment and refund tracking |
-
-**S3 Bucket** (`explorify-trips-ap-south-1`):
-- `profile-images/` — User profile photos
-- `trip-images/{planId}/` — Trip gallery images
-- `itineraries/{planId}.pdf` — Itinerary PDFs
-
-### Payments
-
-**Razorpay** integration supports:
-- Creating payment orders (amount in paise)
-- HMAC-SHA256 signature verification
-- Full and partial refunds
-- Vendor payouts via Razorpay Route/Transfers
-
 ---
 
 ## Deployment
@@ -398,19 +333,6 @@ aws lambda update-function-code \
 | Variable | Description |
 |----------|-------------|
 | `API_SECRET` | Must match the Lambda's `API_SECRET` |
-| `AUTH_SECRET` | NextAuth secret for JWT signing |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `AWS_REGION` | AWS region (default: `ap-south-1`) |
-| `AWS_ACCESS_KEY_ID` | IAM credentials for DynamoDB + S3 |
-| `AWS_SECRET_ACCESS_KEY` | IAM credentials for DynamoDB + S3 |
-| `AWS_S3_BUCKET_NAME` | S3 bucket name (default: `explorify-trips-ap-south-1`) |
-| `DYNAMODB_USERS_TABLE` | Users table name (default: `Users`) |
-| `DYNAMODB_PLANS_TABLE` | Plans table name (default: `TravelPlans`) |
-| `DYNAMODB_BOOKINGS_TABLE` | Bookings table name (default: `Bookings`) |
-| `DYNAMODB_DEPARTURES_TABLE` | Departures table name (default: `Departures`) |
-| `RAZORPAY_KEY_ID` | Razorpay API key ID |
-| `RAZORPAY_KEY_SECRET` | Razorpay API key secret |
 
 ---
 
@@ -449,8 +371,6 @@ cp pkg/session_bg.wasm ../../public/
 | [`lambda_runtime`](https://crates.io/crates/lambda_runtime) | Rust | AWS Lambda runtime with response streaming support |
 | [`wasm-bindgen`](https://crates.io/crates/wasm-bindgen) | Rust | Compiles Rust to WASM for browser use |
 | [`partial-json`](https://www.npmjs.com/package/partial-json) | JS | Parses incomplete/streaming JSON for progressive rendering |
-| [`next-auth`](https://next-auth.js.org/) | JS | Authentication framework for Next.js |
-| [`razorpay`](https://www.npmjs.com/package/razorpay) | JS | Razorpay payment gateway SDK |
 | [`marked`](https://www.npmjs.com/package/marked) | JS | Markdown to HTML conversion |
 
 ---

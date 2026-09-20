@@ -1,0 +1,78 @@
+"use client";
+
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import ProfileMenu from "./ProfileMenu";
+import { Compass } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+export default function Navbar() {
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: "/travel-planner", label: "Travel Planner", icon: Compass },
+  ];
+
+  return (
+    <>
+      {/* ── Brand Bar (static, part of page flow) ── */}
+      <div className="relative z-40 border-b border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <Link
+            href="/travel-planner/details"
+            className="flex items-center gap-2 font-bold text-lg hover:scale-105 transition-transform duration-200 shrink-0"
+          >
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+              E
+            </div>
+            <span className="bg-linear-to-r from-blue-700 to-blue-900 dark:from-blue-400 dark:to-blue-200 bg-clip-text text-transparent">
+              ExplorifyTrips
+            </span>
+          </Link>
+
+          {/* Profile */}
+          <div className="flex items-center gap-3 shrink-0">
+            {status === "loading" ? (
+              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+            ) : session ? (
+              <ProfileMenu user={session.user} />
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Nav Links (sticky — scrolls below brand bar, then pins to top) ── */}
+      {session && (
+        <div className="sticky top-0 z-50 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
+          <nav className="mx-auto max-w-7xl px-6 flex items-center justify-center gap-1 py-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`
+                    flex items-center gap-2 px-3 py-2 sm:px-4 rounded-full text-sm font-medium
+                    transition-all duration-200 hover:scale-105
+                    ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+    </>
+  );
+}

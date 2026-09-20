@@ -1,0 +1,51 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/common/theme-provider";
+import Navbar from "@/components/common/nav/Navbar";
+import Footer from "@/components/common/nav/Footer";
+import AuthProvider from "@/components/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Explorify Trips",
+  description: "Explore and book your next adventure with Explorify Trips",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <Toaster position="top-right" richColors />
+          </AuthProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
